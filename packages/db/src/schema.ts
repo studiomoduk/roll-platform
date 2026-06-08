@@ -66,6 +66,11 @@ export const inventoryItemTypeEnum = pgEnum("inventory_item_type", [
   "trim",
 ]);
 
+// How the decorative artwork is laid onto the cloth (SPEC §2.5):
+//   repeat     — an all-over repeat tiled across the cloth
+//   engineered — a single placement positioned per piece
+export const printModeEnum = pgEnum("print_mode", ["repeat", "engineered"]);
+
 /* -------------------------------------------------------------------------- */
 /*  Tables                                                                     */
 /* -------------------------------------------------------------------------- */
@@ -146,6 +151,7 @@ export const fabrics = pgTable("fabrics", {
   name: text("name").notNull(),
   printArtworkUrl: text("print_artwork_url"),
   baseCloth: text("base_cloth").notNull(), // 'cotton lawn' | 'corduroy' ...
+  printMode: printModeEnum("print_mode").notNull().default("repeat"),
   widthCm: integer("width_cm").notNull().default(150),
   pricePerMetre: numeric("price_per_metre", { precision: 10, scale: 2 }),
   stockMetres: numeric("stock_metres", { precision: 10, scale: 2 })

@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { db, sql } from "./client.js";
+import { db, sql } from "./client";
 import {
   collections,
   styles,
@@ -8,7 +8,7 @@ import {
   patternFiles,
   customers,
   purchaseHistory,
-} from "./schema.js";
+} from "./schema";
 
 /**
  * Seeds the database with a small but realistic Palava made-to-order catalogue:
@@ -89,6 +89,7 @@ async function main() {
     .returning();
 
   const daphne = insertedStyles[0];
+  const quince = insertedStyles[2];
 
   console.log("Seeding pattern files…");
   await db.insert(patternFiles).values([
@@ -127,6 +128,28 @@ async function main() {
         ],
       },
     },
+    {
+      // DXF-AAMA/ASTM pattern — exercises the engine's ezdxf import path.
+      styleId: quince.id,
+      version: 1,
+      format: "dxf",
+      storageUrl: "patterns/quince-v1.dxf",
+      piecesMeta: {
+        unit: "cm",
+        pieces: [
+          { id: "bib-front", label: "Bib front", cut: 1, seamAllowanceCm: 1.0, hemAllowanceCm: 1.0 },
+          { id: "bib-back", label: "Bib back", cut: 1, seamAllowanceCm: 1.0, hemAllowanceCm: 1.0 },
+          {
+            id: "skirt-front",
+            label: "Skirt front",
+            cut: 1,
+            seamAllowanceCm: 1.5,
+            hemAllowanceCm: 4.0,
+            lengthenShortenLine: { from: [0, 60], to: [70, 60] },
+          },
+        ],
+      },
+    },
   ]);
 
   console.log("Seeding fabrics…");
@@ -153,6 +176,7 @@ async function main() {
       name: "Bramble — Needlecord",
       printArtworkUrl: "fabrics/bramble.png",
       baseCloth: "corduroy",
+      printMode: "engineered", // single placement positioned per piece
       widthCm: 150,
       pricePerMetre: "24.00",
       stockMetres: "45.00",

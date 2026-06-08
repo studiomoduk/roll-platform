@@ -43,7 +43,7 @@ def _parse_points(raw: str) -> list[tuple[float, float]]:
     return pts
 
 
-def _resolve_svg_path(storage_url: str | None) -> Path:
+def _resolve_pattern_path(storage_url: str | None) -> Path:
     """Map a pattern_files.storage_url to a local sample file.
 
     `storage_url` like "patterns/daphne-v1.svg" resolves under patterns_dir.
@@ -56,12 +56,28 @@ def _resolve_svg_path(storage_url: str | None) -> Path:
 def load_pieces(
     storage_url: str | None,
     pieces_meta: dict[str, Any] | None,
+    fmt: str | None = None,
 ) -> list[Piece]:
-    svg_path = _resolve_svg_path(storage_url)
-    if not svg_path.exists():
-        raise FileNotFoundError(f"Pattern file not found: {svg_path}")
+    """Format-dispatching loader. `fmt` ('svg'|'dxf') wins; otherwise we infer
+    from the file extension. DXF goes through ezdxf; SVG through the parser below.
+    """
+    path = _resolve_pattern_path(storage_url)
+    if not path.exists():
+        raise FileNotFoundError(f"Pattern file not found: {path}")
 
-    tree = ET.parse(svg_path)
+    chosen = (fmt or path.suffix.lstrip(".")).lower()
+    if chosen == "dxf":
+        from . import dxf
+
+        return dxf.load_pieces(path, pieces_meta)
+    return _load_pieces_from_svg(path, pieces_meta)
+
+
+def _load_pieces_from_svg(
+    path: Path,
+    pieces_meta: dict[str, Any] | None,
+) -> list[Piece]:
+    tree = ET.parse(path)
     root = tree.getroot()
 
     meta_by_id: dict[str, dict[str, Any]] = {}

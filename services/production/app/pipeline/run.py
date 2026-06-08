@@ -59,8 +59,10 @@ def _run_job(job: JobContext) -> None:
 
     set_job_status(job.job_id, "queued", started=True)
 
-    # 1. retrieve graded pattern
-    pieces = pattern.load_pieces(job.pattern_storage_url, job.pieces_meta)
+    # 1. retrieve graded pattern (SVG or DXF, per pattern_files.format)
+    pieces = pattern.load_pieces(
+        job.pattern_storage_url, job.pieces_meta, job.pattern_format
+    )
 
     # 2. length alteration (Stage 2 only)
     if job.stage == 2 and job.length_adj_cm:
@@ -83,6 +85,7 @@ def _run_job(job: JobContext) -> None:
         order_ref=order_ref,
         size_label=job.size,
         artwork_bytes=_load_artwork(job.print_artwork_url),
+        print_mode=job.print_mode,
     )
     tiff_url = save_bytes(f"{job.order_id}/{job.job_id}/print.tiff", tiff)
 

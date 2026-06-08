@@ -71,6 +71,31 @@ def _font(px: int) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
         return ImageFont.load_default()
 
 
+def _engineered_print(
+    size: tuple[int, int],
+    lay: Lay,
+    art: Image.Image | None,
+    px_per_cm: float,
+) -> Image.Image:
+    """Engineered placement: one artwork instance positioned per piece, scaled to
+    cover the piece's bounding box and clipped to its cut polygon."""
+    canvas = Image.new("RGB", size, _FALLBACK_PRINT)
+    if art is None:
+        return canvas
+    for pl in lay.placements:
+        cut = pl.piece.cut_line or pl.piece.sew_line
+        cut = translate(cut, xoff=pl.dx_cm, yoff=pl.dy_cm)
+        minx, miny, maxx, maxy = cut.bounds
+        w = max(_px(maxx - minx, px_per_cm), 1)
+        h = max(_px(maxy - miny, px_per_cm), 1)
+        placed = art.resize((w, h))
+        piece_mask = Image.new("L", (w, h), 0)
+        local = translate(cut, xoff=-minx, yoff=-miny)
+        ImageDraw.Draw(piece_mask).polygon(_poly_to_px(local, px_per_cm), fill=255)
+        canvas.paste(placed, (_px(minx, px_per_cm), _px(miny, px_per_cm)), piece_mask)
+    return canvas
+
+
 def render_lay(
     lay: Lay,
     *,
@@ -78,23 +103,37 @@ def render_lay(
     order_ref: str,
     size_label: str,
     artwork_bytes: bytes | None = None,
+    print_mode: str = "repeat",
 ) -> bytes:
     width_px = _px(lay.cloth_width_cm, px_per_cm)
     height_px = max(_px(lay.length_cm, px_per_cm), 1)
 
-    tile = _load_artwork(artwork_bytes)
+    art = _load_artwork(artwork_bytes)
 
-    # --- Print layer (all-over repeat), masked to the union of cut polygons ---
-    print_layer = _tiled_print((width_px, height_px), tile)
-    mask = Image.new("L", (width_px, height_px), 0)
-    mask_draw = ImageDraw.Draw(mask)
-    for pl in lay.placements:
-        cut = pl.piece.cut_line or pl.piece.sew_line
-        cut = translate(cut, xoff=pl.dx_cm, yoff=pl.dy_cm)
-        mask_draw.polygon(_poly_to_px(cut, px_per_cm), fill=255)
-
-    cloth = Image.new("RGB", (width_px, height_px), (255, 255, 255))
-    cloth.paste(print_layer, (0, 0), mask)
+    # --- Print layer ---------------------------------------------------------
+    if print_mode == "engineered":
+        # Each piece already carries its own clipped placement.
+        cloth = Image.new("RGB", (width_px, height_px), (255, 255, 255))
+        engineered = _engineered_print((width_px, height_px), lay, art, px_per_cm)
+        full_mask = Image.new("L", (width_px, height_px), 0)
+        mdraw = ImageDraw.Draw(full_mask)
+        for pl in lay.placements:
+            cut = translate(
+                pl.piece.cut_line or pl.piece.sew_line, xoff=pl.dx_cm, yoff=pl.dy_cm
+            )
+            mdraw.polygon(_poly_to_px(cut, px_per_cm), fill=255)
+        cloth.paste(engineered, (0, 0), full_mask)
+    else:
+        # All-over repeat tiled across the cloth, masked to the union of pieces.
+        print_layer = _tiled_print((width_px, height_px), art)
+        mask = Image.new("L", (width_px, height_px), 0)
+        mask_draw = ImageDraw.Draw(mask)
+        for pl in lay.placements:
+            cut = pl.piece.cut_line or pl.piece.sew_line
+            cut = translate(cut, xoff=pl.dx_cm, yoff=pl.dy_cm)
+            mask_draw.polygon(_poly_to_px(cut, px_per_cm), fill=255)
+        cloth = Image.new("RGB", (width_px, height_px), (255, 255, 255))
+        cloth.paste(print_layer, (0, 0), mask)
 
     draw = ImageDraw.Draw(cloth)
     label_font = _font(_px(0.7, px_per_cm))

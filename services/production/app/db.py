@@ -41,6 +41,7 @@ class JobContext:
     fabric_id: str
     fabric_name: str
     print_artwork_url: str | None
+    print_mode: str
     cloth_width_cm: float
     size: str
     stage: int
@@ -64,6 +65,7 @@ def fetch_jobs_for_order(order_id: str) -> list[JobContext]:
             f.id             as fabric_id,
             f.name           as fabric_name,
             f.print_artwork_url,
+            coalesce(f.print_mode, 'repeat') as print_mode,
             coalesce(f.width_cm, 150) as cloth_width_cm,
             oi.size,
             oi.stage,
@@ -99,6 +101,7 @@ def fetch_jobs_for_order(order_id: str) -> list[JobContext]:
             fabric_id=str(r["fabric_id"]),
             fabric_name=r["fabric_name"],
             print_artwork_url=r["print_artwork_url"],
+            print_mode=r["print_mode"],
             cloth_width_cm=float(r["cloth_width_cm"]),
             size=r["size"],
             stage=int(r["stage"]),
