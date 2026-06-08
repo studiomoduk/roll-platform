@@ -248,6 +248,13 @@ export const stylesRelations = relations(styles, ({ one, many }) => ({
   patternFiles: many(patternFiles),
 }));
 
+export const patternFilesRelations = relations(patternFiles, ({ one }) => ({
+  style: one(styles, {
+    fields: [patternFiles.styleId],
+    references: [styles.id],
+  }),
+}));
+
 export const ordersRelations = relations(orders, ({ one, many }) => ({
   customer: one(customers, {
     fields: [orders.customerId],
