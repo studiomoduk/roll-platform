@@ -1,0 +1,20 @@
+[project]
+name = "palava-production"
+version = "0.1.0"
+description = "Palava made-to-order production engine: pattern → seam allowance → lay → print file"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.115,<0.116",
+    "uvicorn[standard]>=0.32,<0.33",
+    "pydantic>=2.9,<3",
+    "pydantic-settings>=2.6,<3",
+    "psycopg[binary]>=3.2,<4",
+    "shapely>=2.0,<3",
+    "ezdxf>=1.3,<2",
+    "Pillow>=11.0,<12",
+    "reportlab>=4.2,<5",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["app*"]

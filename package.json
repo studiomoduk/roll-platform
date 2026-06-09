@@ -1,0 +1,23 @@
+{
+  "name": "palava-mto",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Palava made-to-order clothing platform monorepo",
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @palava/web dev",
+    "build": "pnpm --filter @palava/web build",
+    "lint": "pnpm -r lint",
+    "db:generate": "pnpm --filter @palava/db generate",
+    "db:migrate": "pnpm --filter @palava/db migrate",
+    "db:push": "pnpm --filter @palava/db push",
+    "db:seed": "pnpm --filter @palava/db seed",
+    "db:studio": "pnpm --filter @palava/db studio"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3"
+  }
+}

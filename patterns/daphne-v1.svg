@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Sample graded pattern for the "Daphne Dress" (style DAPHNE-V1), version 1.
+  Coordinates are in CENTIMETRES. Each <polygon> is one pattern piece, annotated
+  with data-* attributes the production engine reads (see services/production
+  app/pipeline/pattern.py). data-ls-y is the lengthen/shorten line (Stage 2).
+
+  This is a deliberately simplified stand-in for a real DXF-AAMA/ASTM export.
+  viewBox is in cm; pieces are laid out for readability, not for the final lay
+  (the engine re-nests them).
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="150cm" height="90cm" viewBox="0 0 150 90">
+  <polygon id="bodice-front"
+           data-label="Bodice front"
+           data-cut="2"
+           data-seam="1.0"
+           data-hem="2.5"
+           data-ls-y="40"
+           points="0,0 28,0 30,18 26,40 28,55 2,55 0,40 4,18" />
+
+  <polygon id="bodice-back"
+           data-label="Bodice back"
+           data-cut="2"
+           data-seam="1.0"
+           data-hem="2.5"
+           data-ls-y="40"
+           points="34,0 62,0 64,18 60,40 62,55 36,55 34,40 36,18" />
+
+  <polygon id="skirt-front"
+           data-label="Skirt front"
+           data-cut="1"
+           data-seam="1.5"
+           data-hem="4.0"
+           data-ls-y="60"
+           points="68,0 138,0 146,80 60,80" />
+</svg>
