@@ -11,6 +11,7 @@ import {
 import { estimatePrice } from "@/lib/pricing";
 import { stripe } from "@/lib/stripe";
 import { markOrderPaid } from "@/lib/fulfillment";
+import { getAppUrl } from "@/lib/app-url";
 
 export async function POST(req: Request) {
   let body: Record<string, unknown>;
@@ -92,7 +93,7 @@ export async function POST(req: Request) {
     price: quote.total.toFixed(2),
   });
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const appUrl = getAppUrl();
 
   // No Stripe configured → dev path: mark paid immediately so the pipeline runs.
   if (!stripe) {
