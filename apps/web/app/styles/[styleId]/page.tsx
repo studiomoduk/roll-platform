@@ -27,7 +27,16 @@ export default async function StylePage({
 
       <div className="mt-6 grid grid-cols-1 gap-10 lg:grid-cols-2">
         <div>
-          <div className="aspect-[3/4] rounded-2xl bg-sand/70" />
+          <div className="aspect-[3/4] overflow-hidden rounded-2xl bg-sand/70">
+            {style.imageUrl && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={style.imageUrl}
+                alt={style.name}
+                className="h-full w-full object-cover"
+              />
+            )}
+          </div>
           <p className="mt-3 text-xs text-ink/40">
             {style.collection.name} · {style.collection.season}{" "}
             {style.collection.year}
@@ -57,6 +66,7 @@ export default async function StylePage({
                 name: f.name,
                 baseCloth: f.baseCloth,
                 pricePerMetre: f.pricePerMetre,
+                imageUrl: f.printArtworkUrl,
               }))}
             />
           </div>

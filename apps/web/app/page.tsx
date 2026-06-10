@@ -57,7 +57,17 @@ export default async function HomePage() {
                   href={`/styles/${style.id}`}
                   className="group rounded-2xl border border-ink/10 bg-white/40 p-5 transition hover:border-clay/50"
                 >
-                  <div className="aspect-[3/4] rounded-xl bg-sand/70" />
+                  <div className="aspect-[3/4] overflow-hidden rounded-xl bg-sand/70">
+                    {style.imageUrl && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={style.imageUrl}
+                        alt={style.name}
+                        loading="lazy"
+                        className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                      />
+                    )}
+                  </div>
                   <h3 className="mt-4 font-serif text-lg group-hover:text-clay">
                     {style.name}
                   </h3>

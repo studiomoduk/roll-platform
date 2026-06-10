@@ -111,8 +111,11 @@ CREATE TABLE IF NOT EXISTS "styles" (
 	"stage2_min_cm" numeric(6, 2),
 	"stage2_max_cm" numeric(6, 2),
 	"pattern_ref" text,
+	"image_url" text,
 	"is_active" boolean DEFAULT true NOT NULL
 );
+-- Add image_url for databases created before this column existed.
+ALTER TABLE "styles" ADD COLUMN IF NOT EXISTS "image_url" text;
 CREATE TABLE IF NOT EXISTS "trims" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"name" text NOT NULL,
@@ -139,8 +142,8 @@ CREATE INDEX IF NOT EXISTS "purchase_history_customer_idx" ON "purchase_history"
 -- ============================================================================
 DO $$
 DECLARE
-  ss21 uuid; aw19 uuid;
-  daphne uuid; marlow uuid; quince uuid;
+  ss26 uuid; coastal uuid;
+  louise uuid; cynthia uuid;
   rosa uuid;
 BEGIN
   -- Clear seeded tables (FK-safe order)
@@ -154,32 +157,51 @@ BEGIN
 
   -- Collections
   INSERT INTO collections (name, season, year, is_active, blurb)
-  VALUES ('Coastal','Spring/Summer',2021,true,'Light cotton lawns and easy shapes drawn from the SS21 archive.')
-  RETURNING id INTO ss21;
+  VALUES ('Spring/Summer 2026','Spring/Summer',2026,true,'Hand-drawn prints on easy cotton silhouettes — made to order, to your length.')
+  RETURNING id INTO ss26;
   INSERT INTO collections (name, season, year, is_active, blurb)
-  VALUES ('Orchard','Autumn/Winter',2019,true,'Needlecord pinafores and blouses from the AW19 archive.')
-  RETURNING id INTO aw19;
+  VALUES ('Coastal Stories','Spring/Summer',2026,true,'Seaside prints and breezy linen shapes from the coastal capsule.')
+  RETURNING id INTO coastal;
 
-  -- Styles
-  INSERT INTO styles (collection_id, name, kind, base_length_cm, stage2_min_cm, stage2_max_cm, pattern_ref, is_active)
-  VALUES (ss21,'Daphne Dress','dress',112.00,-10.00,10.00,'DAPHNE-V1',true) RETURNING id INTO daphne;
-  INSERT INTO styles (collection_id, name, kind, base_length_cm, stage2_min_cm, stage2_max_cm, pattern_ref, is_active)
-  VALUES (ss21,'Marlow Blouse','blouse',62.00,-6.00,6.00,'MARLOW-V1',true) RETURNING id INTO marlow;
-  INSERT INTO styles (collection_id, name, kind, base_length_cm, stage2_min_cm, stage2_max_cm, pattern_ref, is_active)
-  VALUES (aw19,'Quince Pinafore','pinafore',98.00,-10.00,10.00,'QUINCE-V1',true) RETURNING id INTO quince;
+  -- Styles (silhouettes). Hero images hot-link Palava's own Shopify CDN.
+  INSERT INTO styles (collection_id, name, kind, base_length_cm, stage2_min_cm, stage2_max_cm, pattern_ref, image_url, is_active)
+  VALUES (ss26,'Louise','dress',115.00,-10.00,10.00,'LOUISE-V1','https://palava.co/cdn/shop/products/louise-peas-front-creambg2.jpg',true)
+  RETURNING id INTO louise;
+  INSERT INTO styles (collection_id, name, kind, base_length_cm, stage2_min_cm, stage2_max_cm, pattern_ref, image_url, is_active)
+  VALUES (ss26,'Cynthia','dress',116.00,-10.00,10.00,'CYNTHIA-V1','https://palava.co/cdn/shop/files/Cynthia-NavyCornfield-Front-Cream.jpg',true)
+  RETURNING id INTO cynthia;
+  INSERT INTO styles (collection_id, name, kind, base_length_cm, stage2_min_cm, stage2_max_cm, pattern_ref, image_url, is_active) VALUES
+  (ss26,'Rita','dress',118.00,-10.00,10.00,'RITA-V1','https://palava.co/cdn/shop/files/RitaStrawberries-Front-Cream.jpg',true),
+  (ss26,'Tabatha','dress',114.00,-10.00,10.00,'TABATHA-V1','https://palava.co/cdn/shop/files/Tabatha-Tennis-Front-Cream.jpg',true),
+  (ss26,'Philippa','dress',120.00,-10.00,10.00,'PHILIPPA-V1','https://palava.co/cdn/shop/files/Philippa-CreamCake-Front-Cream.jpg',true),
+  (coastal,'Beatrice','dress',110.00,-8.00,8.00,'BEATRICE-V1','https://palava.co/cdn/shop/files/BeatriceCap-IvoryLobsters-Front-Creambg.jpg',true),
+  (coastal,'Mabel','dress',112.00,-8.00,8.00,'MABEL-V1','https://palava.co/cdn/shop/files/Mabel-NavyBoxStripe-Front-creambg.jpg',true),
+  (coastal,'Izzy','dress',113.00,-8.00,8.00,'IZZY-V1','https://palava.co/cdn/shop/files/Izzy-NavyLargeSails-FrontOpenNeck-creambgcopy.jpg',true);
 
-  -- Pattern files
+  -- Pattern files (attached to a couple of styles so the production demo runs)
   INSERT INTO pattern_files (style_id, version, format, storage_url, pieces_meta) VALUES
-  (daphne, 1, 'svg', 'patterns/daphne-v1.svg',
+  (louise, 1, 'svg', 'patterns/louise-v1.svg',
    '{"unit":"cm","pieces":[{"id":"bodice-front","label":"Bodice front","cut":2,"seamAllowanceCm":1.0,"hemAllowanceCm":2.5,"lengthenShortenLine":{"from":[0,40],"to":[30,40]}},{"id":"bodice-back","label":"Bodice back","cut":2,"seamAllowanceCm":1.0,"hemAllowanceCm":2.5,"lengthenShortenLine":{"from":[0,40],"to":[30,40]}},{"id":"skirt-front","label":"Skirt front","cut":1,"seamAllowanceCm":1.5,"hemAllowanceCm":4.0,"lengthenShortenLine":{"from":[0,60],"to":[70,60]}}]}'::jsonb),
-  (quince, 1, 'dxf', 'patterns/quince-v1.dxf',
-   '{"unit":"cm","pieces":[{"id":"bib-front","label":"Bib front","cut":1,"seamAllowanceCm":1.0,"hemAllowanceCm":1.0},{"id":"bib-back","label":"Bib back","cut":1,"seamAllowanceCm":1.0,"hemAllowanceCm":1.0},{"id":"skirt-front","label":"Skirt front","cut":1,"seamAllowanceCm":1.5,"hemAllowanceCm":4.0,"lengthenShortenLine":{"from":[0,60],"to":[70,60]}}]}'::jsonb);
+  (cynthia, 1, 'dxf', 'patterns/cynthia-v1.dxf',
+   '{"unit":"cm","pieces":[{"id":"bodice-front","label":"Bodice front","cut":2,"seamAllowanceCm":1.0,"hemAllowanceCm":2.5},{"id":"bodice-back","label":"Bodice back","cut":2,"seamAllowanceCm":1.0,"hemAllowanceCm":2.5},{"id":"skirt-front","label":"Skirt front","cut":1,"seamAllowanceCm":1.5,"hemAllowanceCm":4.0,"lengthenShortenLine":{"from":[0,60],"to":[70,60]}}]}'::jsonb);
 
-  -- Fabrics
+  -- Fabrics (prints). Swatch previews hot-link Palava's own Shopify CDN.
   INSERT INTO fabrics (name, print_artwork_url, base_cloth, print_mode, width_cm, price_per_metre, stock_metres, is_active) VALUES
-  ('Wildflower — Cotton Lawn','fabrics/wildflower.png','cotton lawn','repeat',150,18.00,120.00,true),
-  ('Pennant Stripe — Cotton Lawn','fabrics/pennant-stripe.png','cotton lawn','repeat',150,18.00,80.00,true),
-  ('Bramble — Needlecord','fabrics/bramble.png','corduroy','engineered',150,24.00,45.00,true);
+  ('Green Peas','https://palava.co/cdn/shop/products/louise-peas-front-creambg2.jpg','cotton lawn','repeat',150,18.00,120.00,true),
+  ('Red Strawberries','https://palava.co/cdn/shop/files/RitaStrawberries-Front-Cream.jpg','cotton lawn','repeat',150,18.00,90.00,true),
+  ('Green Pot Plants','https://palava.co/cdn/shop/files/Louise-PotPlants-Cream.jpg','cotton lawn','repeat',150,18.00,75.00,true),
+  ('Teal Checks','https://palava.co/cdn/shop/files/Louise-TealChecks-Cream.jpg','cotton','repeat',150,16.00,60.00,true),
+  ('Navy Cornfield','https://palava.co/cdn/shop/files/Cynthia-NavyCornfield-Front-Cream.jpg','cotton lawn','repeat',150,18.00,80.00,true),
+  ('Blue Festival','https://palava.co/cdn/shop/files/Louise-BlueFestival-Cream.jpg','cotton lawn','repeat',150,18.00,55.00,true),
+  ('Blue Ditsy Daisy','https://palava.co/cdn/shop/files/Rita-BlueDaisyDitsy-Front-Cream.jpg','cotton lawn','repeat',150,18.00,70.00,true),
+  ('Black Big Top','https://palava.co/cdn/shop/files/Cynthia-BlackBigTop-Front-Cream.jpg','cotton lawn','engineered',150,20.00,40.00,true),
+  ('Blue Tennis','https://palava.co/cdn/shop/files/Tabatha-Tennis-Front-Cream.jpg','cotton lawn','repeat',150,18.00,50.00,true),
+  ('Pink Thumb Print','https://palava.co/cdn/shop/files/Tabatha-Thumb-front-Cream.jpg','cotton lawn','repeat',150,18.00,48.00,true),
+  ('Teal Foxgloves','https://palava.co/cdn/shop/files/Philippa-TealFoxgloves-Creambg.jpg','cotton lawn','repeat',150,18.00,52.00,true),
+  ('Navy Leaping Tigers','https://palava.co/cdn/shop/products/Cynthianavyleapingtigerfront2-creambg.jpg','cotton lawn','engineered',150,20.00,36.00,true),
+  ('Ivory Lobster','https://palava.co/cdn/shop/files/BeatriceCap-IvoryLobsters-Front-Creambg.jpg','cotton lawn','repeat',150,18.00,44.00,true),
+  ('Navy Box Stripe','https://palava.co/cdn/shop/files/Mabel-NavyBoxStripe-Front-creambg.jpg','linen','repeat',150,22.00,38.00,true),
+  ('Blue Sails','https://palava.co/cdn/shop/files/Izzy-NavyLargeSails-FrontOpenNeck-creambgcopy.jpg','linen','repeat',150,22.00,42.00,true);
 
   -- Trims
   INSERT INTO trims (name, stock_qty) VALUES
@@ -188,5 +210,5 @@ BEGIN
   -- Returning customer + purchase history
   INSERT INTO customers (email, name) VALUES ('rosa@example.com','Rosa Bell') RETURNING id INTO rosa;
   INSERT INTO purchase_history (customer_id, purchased_at, style_id, size, source)
-  VALUES (rosa, '2023-05-01', daphne, 'UK 12', 'palava');
+  VALUES (rosa, '2023-05-01', louise, 'UK 12', 'palava');
 END $$;

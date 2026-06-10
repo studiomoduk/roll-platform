@@ -17,6 +17,7 @@ type FabricLite = {
   name: string;
   baseCloth: string;
   pricePerMetre: string | null;
+  imageUrl: string | null;
 };
 
 const SIZES = ["UK 8", "UK 10", "UK 12", "UK 14", "UK 16", "UK 18"];
@@ -104,7 +105,17 @@ export function OrderForm({
                   : "border-ink/15 hover:border-ink/30"
               }`}
             >
-              <div className="aspect-video rounded-lg bg-sand/70" />
+              <div className="aspect-video overflow-hidden rounded-lg bg-sand/70">
+                {f.imageUrl && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={f.imageUrl}
+                    alt={f.name}
+                    loading="lazy"
+                    className="h-full w-full object-cover"
+                  />
+                )}
+              </div>
               <p className="mt-2 text-sm font-medium">{f.name}</p>
               <p className="text-xs capitalize text-ink/50">{f.baseCloth}</p>
             </button>

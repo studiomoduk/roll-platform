@@ -123,6 +123,7 @@ export const styles = pgTable("styles", {
   stage2MinCm: numeric("stage2_min_cm", { precision: 6, scale: 2 }),
   stage2MaxCm: numeric("stage2_max_cm", { precision: 6, scale: 2 }),
   patternRef: text("pattern_ref"),
+  imageUrl: text("image_url"),
   isActive: boolean("is_active").notNull().default(true),
 });
 
