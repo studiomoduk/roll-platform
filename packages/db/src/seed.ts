@@ -23,15 +23,12 @@ import {
  * Idempotent-ish: it wipes the seeded tables first so it can be re-run.
  */
 async function main() {
-  console.log("Clearing existing catalogue data…");
-  // Order matters for FKs.
-  await db.delete(purchaseHistory);
-  await db.delete(patternFiles);
-  await db.delete(styles);
-  await db.delete(collections);
-  await db.delete(fabrics);
-  await db.delete(trims);
-  await db.delete(customers);
+  console.log("Clearing existing data…");
+  // TRUNCATE … CASCADE also clears any test orders/order_items/jobs that
+  // reference styles, which a plain DELETE would block on.
+  await sql`TRUNCATE production_jobs, inventory_movements, order_items, orders,
+            purchase_history, pattern_files, styles, fabrics, trims,
+            collections, customers RESTART IDENTITY CASCADE`;
 
   console.log("Seeding collections…");
   const [ss26, coastal] = await db

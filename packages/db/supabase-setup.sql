@@ -146,14 +146,10 @@ DECLARE
   louise uuid; cynthia uuid;
   rosa uuid;
 BEGIN
-  -- Clear seeded tables (FK-safe order)
-  DELETE FROM purchase_history;
-  DELETE FROM pattern_files;
-  DELETE FROM styles;
-  DELETE FROM collections;
-  DELETE FROM fabrics;
-  DELETE FROM trims;
-  DELETE FROM customers;
+  -- Clear all data (CASCADE handles orders/order_items/jobs that reference styles)
+  TRUNCATE production_jobs, inventory_movements, order_items, orders,
+           purchase_history, pattern_files, styles, fabrics, trims,
+           collections, customers RESTART IDENTITY CASCADE;
 
   -- Collections
   INSERT INTO collections (name, season, year, is_active, blurb)
